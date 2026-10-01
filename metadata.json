@@ -1,0 +1,7 @@
+{
+  "name": "ADVYX",
+  "description": "Minimalist digital marketing agency portfolio for ADVYX featuring social media management, branding, performance ads, time-of-day adaptive theme, discovery scheduler, and client dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
