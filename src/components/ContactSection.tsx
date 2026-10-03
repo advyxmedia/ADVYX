@@ -153,7 +153,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     setTimeout(() => setCopiedEmail(false), 2500);
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName.trim() || !businessName.trim() || !email.trim()) return;
 
