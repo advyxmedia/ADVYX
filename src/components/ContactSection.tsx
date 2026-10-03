@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { Inquiry } from '../types';
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 import {
   COUNTRY_BUDGET_CONFIGS,
   DEFAULT_COUNTRY_CODE,
@@ -151,7 +153,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     setTimeout(() => setCopiedEmail(false), 2500);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName.trim() || !businessName.trim() || !email.trim()) return;
 
@@ -174,6 +176,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     };
 
     onInquirySubmitted(newInquiry);
+
+// Save inquiry to Firestore
+    try {
+      await addDoc(collection(db, "inquiries"), {
+        ...newInquiry,
+        submittedAt: new Date().toISOString(),
+      });
+      console.log("Inquiry saved to Firestore successfully!");
+    } catch (err) {
+      console.error("Failed to save inquiry to Firestore:", err);
+    }
+    
     setIsSubmitted(true);
 
     // Reset Form
