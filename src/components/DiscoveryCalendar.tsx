@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Appointment } from '../types';
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -185,7 +187,7 @@ export const DiscoveryCalendar: React.FC<DiscoveryCalendarProps> = ({
 
   const activeDate = customDate || availableDates[selectedDateIndex];
 
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async(e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !businessName.trim()) return;
 
@@ -208,6 +210,18 @@ export const DiscoveryCalendar: React.FC<DiscoveryCalendarProps> = ({
 
     onAppointmentBooked(newAppt);
     setConfirmedAppt(newAppt);
+
+// Save booking directly to Firestore
+    try {
+      await addDoc(collection(db, "inquiries"), {
+        ...newAppt,
+        submittedAt: new Date().toISOString()
+      });
+      console.log("Appointment saved to Firestore successfully!");
+    } catch (err) {
+      console.error("Failed to save to Firestore:", err);
+    }
+    
     setIsBooked(true);
   };
 
