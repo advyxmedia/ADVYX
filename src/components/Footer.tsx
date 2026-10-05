@@ -48,12 +48,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDashboard }) => {
 
               {/* Modern X (formerly Twitter) */}
               <a
-                href="https://x.com/advyx81998"
+                href="https://x.com/advyxmedia"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl text-[#1DA1F2] bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 border border-[#1DA1F2]/25 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm"
-                aria-label="X (@advyx81998)"
-                title="X (@advyx81998)"
+                aria-label="X (@advyxmedia)"
+                title="X (@advyxmedia)"
               >
                 <XLogoIcon className="w-4 h-4" />
               </a>
@@ -158,13 +158,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDashboard }) => {
                     <span>@advyxmedia (Instagram)</span>
                   </a>
                   <a
-                    href="https://x.com/advyx81998"
+                    href="https://x.com/advyxmedia"
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`hover:underline flex items-center gap-2 ${isDark ? 'text-white hover:text-slate-200' : 'text-slate-950 hover:text-black'}`}
                   >
                     <XLogoIcon className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-white' : 'text-slate-950'}`} />
-                    <span>@advyx81998 (X)</span>
+                    <span>@advyxmedia (X)</span>
                   </a>
                   <a
                     href="https://www.threads.net/@advyxmedia"
