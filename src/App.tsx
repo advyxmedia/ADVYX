@@ -38,30 +38,31 @@ function MainApp() {
   const [showAdminAuthModal, setShowAdminAuthModal] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
 
-  // Live State from Firestore
-  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  // Inquiries State with LocalStorage Persistence
+  const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
+    const saved = localStorage.getItem('advyx_inquiries');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse inquiries', e);
+      }
+    }
+    return SEEDED_INQUIRIES;
+  });
 
-  useEffect(() => {
-    const q = query(collection(db, "inquiries"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as any[];
-
-      // Distinguish bookings vs general inquiries
-      const appts = docsData.filter((item) => item.callType || item.date);
-      const inqs = docsData.filter((item) => !item.callType && !item.date);
-
-      setAppointments(appts);
-      setInquiries(inqs);
-    }, (error) => {
-      console.error("Error fetching live data from Firestore:", error);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  // Appointments State with LocalStorage Persistence
+  const [appointments, setAppointments] = useState<Appointment[]>(() => {
+    const saved = localStorage.getItem('advyx_appointments');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse appointments', e);
+      }
+    }
+    return SEEDED_APPOINTMENTS;
+  });
 
   // Testimonials State with LocalStorage Persistence
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
