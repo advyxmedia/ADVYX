@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Testimonial } from '../types';
-import { Star, StarHalf, PlusCircle, CheckCircle, MessageSquare, X, Quote } from 'lucide-react';
+import {
+  Star,
+  StarHalf,
+  PlusCircle,
+  CheckCircle,
+  MessageSquare,
+  X,
+  Quote,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { ClientLogo } from './ClientLogo';
 
 interface TestimonialsSectionProps {
@@ -11,13 +21,14 @@ interface TestimonialsSectionProps {
 }
 
 export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
-  testimonials,
+  testimonials = [],
   onAddTestimonial,
 }) => {
   const { isDark } = useTheme();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Form State
   const [clientName, setClientName] = useState('');
@@ -27,10 +38,26 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState('');
 
+  // Only display testimonials that have been verified/approved by you
+  const approvedTestimonials = testimonials.filter(
+    (item) => item.isVerified !== false
+  );
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -380 : 380;
+      scrollContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName.trim() || !company.trim() || !content.trim()) return;
 
+    // isVerified: false holds the review pending your check/approval
     const newTestimonial: Testimonial = {
       id: `test-${Date.now()}`,
       clientName: clientName.trim(),
@@ -39,8 +66,11 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
       projectType,
       rating,
       content: content.trim(),
-      date: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      isVerified: true,
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+      }),
+      isVerified: false,
     };
 
     onAddTestimonial(newTestimonial);
@@ -54,14 +84,14 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     setRating(5);
 
     setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 4000);
+    setTimeout(() => setShowSuccessToast(false), 5000);
   };
 
   return (
     <section id="testimonials" className="py-20 sm:py-24 relative w-full max-w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header with descender safety */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 sm:mb-16 gap-4">
+        {/* Header with Title and Scroll Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-14 gap-4">
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#2374B8] mb-3">
               <Quote className="w-3.5 h-3.5" />
@@ -76,30 +106,64 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
             </h2>
           </div>
 
-          <button
-            id="open-add-testimonial-btn"
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold border border-[#2374B8]/40 bg-[#2374B8]/10 text-[#2374B8] dark:text-sky-300 hover:bg-[#2374B8] hover:text-white transition-all self-start sm:self-auto cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>{t.testimonials.addReview}</span>
-          </button>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            {/* Scroll Navigation Arrows */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleScroll('left')}
+                aria-label="Scroll testimonials left"
+                className={`p-2.5 rounded-full border transition-all ${
+                  isDark
+                    ? 'border-slate-800 bg-slate-900/80 text-white hover:bg-slate-800 hover:border-[#2374B8]'
+                    : 'border-slate-200 bg-white text-slate-800 hover:bg-slate-100 hover:border-[#2374B8] shadow-sm'
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleScroll('right')}
+                aria-label="Scroll testimonials right"
+                className={`p-2.5 rounded-full border transition-all ${
+                  isDark
+                    ? 'border-slate-800 bg-slate-900/80 text-white hover:bg-slate-800 hover:border-[#2374B8]'
+                    : 'border-slate-200 bg-white text-slate-800 hover:bg-slate-100 hover:border-[#2374B8] shadow-sm'
+                }`}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button
+              id="open-add-testimonial-btn"
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold border border-[#2374B8]/40 bg-[#2374B8]/10 text-[#2374B8] dark:text-sky-300 hover:bg-[#2374B8] hover:text-white transition-all cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>{t.testimonials.addReview}</span>
+            </button>
+          </div>
         </div>
 
         {/* Success Toast */}
         {showSuccessToast && (
           <div className="mb-8 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
             <CheckCircle className="w-4 h-4 shrink-0" />
-            <span>Thank you for your testimonial! Your review has been verified and published to the site.</span>
+            <span>Thank you for your testimonial! It has been submitted for review and will be published once approved.</span>
           </div>
         )}
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {testimonials.map((item) => (
+        {/* Testimonials Horizontal Carousel */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scroll-smooth no-scrollbar"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {approvedTestimonials.map((item) => (
             <div
               key={item.id}
-              className={`p-6 rounded-3xl border flex flex-col justify-between transition-all duration-300 ${
+              className={`w-[85vw] sm:w-[360px] md:w-[380px] shrink-0 snap-start p-6 rounded-3xl border flex flex-col justify-between transition-all duration-300 ${
                 isDark
                   ? 'bg-[#0E1729]/70 border-slate-800/80 hover:border-[#2374B8]/40'
                   : 'bg-white border-slate-200/90 hover:border-[#2374B8]/40 shadow-sm'
@@ -151,6 +215,20 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                 >
                   "{item.content}"
                 </p>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-bold text-slate-900 dark:text-white block font-display">
+                    {item.clientName}
+                  </span>
+                  <span className="text-slate-400 text-[11px]">
+                    {item.role ? `${item.role}, ` : ''}{item.company}
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-slate-400">
+                  {item.date}
+                </span>
               </div>
             </div>
           ))}
@@ -264,7 +342,9 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                     >
                       <Star
                         className={`w-5 h-5 ${
-                          star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'
+                          star <= rating
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-slate-300 dark:text-slate-600'
                         }`}
                       />
                     </button>
@@ -303,7 +383,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                   id="submit-testimonial-btn"
                   className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2374B8] hover:bg-[#18598F] shadow-sm shadow-[#2374B8]/30 transition-all"
                 >
-                  Publish Review
+                  Submit Review
                 </button>
               </div>
             </form>
