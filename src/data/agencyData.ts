@@ -66,7 +66,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     challenge: 'Yaki Home & Objects required a distinct, international-caliber visual identity reflecting quiet luxury, tactile craftsmanship, and serene interior aesthetics.',
     solution: 'Created an architectural brand identity system: custom logo typography, packaging collateral, comprehensive design system guidelines, and a curated digital rollout.',
     deliverables: ['Visual Identity & Logo System', 'Packaging & Box Architecture', 'Brand Guidelines Book', 'Social Grid Launch Direction', 'E-commerce Asset Guidelines'],
-    clientQuote: 'Sal at ADVYX designed our logo, built our Shopify store, and set up our hosting, turning an idea into a shop that looks as good as the pieces we sell. Quick, easy to work with, and clean design.',
+    clientQuote: 'Sushant at ADVYX designed our logo, built our Shopify store, and set up our hosting, turning an idea into a shop that looks as good as the pieces we sell. Quick, easy to work with, and clean design.',
     period: 'Brand Launch Phase',
   },
 ];
@@ -78,7 +78,7 @@ export const INITIAL_TESTIMONIALS: Testimonial[] = [
     role: 'Founder',
     company: 'Yaki Home & Objects',
     rating: 5,
-    content: "When we launched Yaki Home & Objects, I wanted the brand to feel premium from day one, and Sal at ADVYX delivered that. He designed our logo, built our Shopify store, and set up our hosting, so we went from an idea to a shop that looks as good as the pieces we sell. He took the time to understand the feel we were going for and turned it into a clean, elegant design. He was quick, easy to work with, and explained the technical side clearly. If you're launching a design-focused brand and want the logo and website done properly, I'd recommend ADVYX.",
+    content: "When we launched Yaki Home & Objects, I wanted the brand to feel premium from day one, and  at ADVYX delivered that. He designed our logo, built our Shopify store, and set up our hosting, so we went from an idea to a shop that looks as good as the pieces we sell. He took the time to understand the feel we were going for and turned it into a clean, elegant design. He was quick, easy to work with, and explained the technical side clearly. If you're launching a design-focused brand and want the logo and website done properly, I'd recommend ADVYX.",
     projectType: 'Branding & E-Commerce Store',
     date: 'February 2025',
     isVerified: true,
