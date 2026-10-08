@@ -48,8 +48,8 @@ interface AgencyDashboardModalProps {
 export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
   isOpen,
   onClose,
-  inquiries,
-  appointments,
+  inquiries = [],
+  appointments = [],
   onUpdateInquiryStatus,
   onUpdateInquiryNotes,
   onDeleteInquiry,
@@ -98,27 +98,47 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Filtered inquiries
-  const filteredInquiries = inquiries.filter((inq) => {
+  const safeInquiries = Array.isArray(inquiries) ? inquiries : [];
+  const safeAppointments = Array.isArray(appointments) ? appointments : [];
+  const term = (searchQuery || '').toLowerCase().trim();
+
+  // Filtered inquiries (Safe from undefined properties)
+  const filteredInquiries = safeInquiries.filter((inq) => {
+    const client = (inq?.clientName || '').toLowerCase();
+    const business = (inq?.businessName || '').toLowerCase();
+    const email = (inq?.email || '').toLowerCase();
+    const service = (inq?.service || '').toLowerCase();
+
     const matchesSearch =
-      inq.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inq.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inq.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inq.service.toLowerCase().includes(searchQuery.toLowerCase());
+      !term ||
+      client.includes(term) ||
+      business.includes(term) ||
+      email.includes(term) ||
+      service.includes(term);
+
     const matchesFilter =
-      inquiryStatusFilter === 'All' || inq.status === inquiryStatusFilter;
+      inquiryStatusFilter === 'All' || inq?.status === inquiryStatusFilter;
+
     return matchesSearch && matchesFilter;
   });
 
-  // Filtered appointments
-  const filteredAppointments = appointments.filter((appt) => {
+  // Filtered appointments (Safe from undefined properties)
+  const filteredAppointments = safeAppointments.filter((appt) => {
+    const name = (appt?.name || '').toLowerCase();
+    const business = (appt?.businessName || '').toLowerCase();
+    const email = (appt?.email || '').toLowerCase();
+    const service = (appt?.service || '').toLowerCase();
+
     const matchesSearch =
-      appt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      appt.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      appt.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      appt.service.toLowerCase().includes(searchQuery.toLowerCase());
+      !term ||
+      name.includes(term) ||
+      business.includes(term) ||
+      email.includes(term) ||
+      service.includes(term);
+
     const matchesFilter =
-      appointmentStatusFilter === 'All' || appt.status === appointmentStatusFilter;
+      appointmentStatusFilter === 'All' || appt?.status === appointmentStatusFilter;
+
     return matchesSearch && matchesFilter;
   });
 
@@ -150,7 +170,7 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
   const exportData = () => {
     const dataStr =
       'data:text/json;charset=utf-8,' +
-      encodeURIComponent(JSON.stringify({ inquiries, appointments }, null, 2));
+      encodeURIComponent(JSON.stringify({ inquiries: safeInquiries, appointments: safeAppointments }, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
     downloadAnchor.setAttribute('download', `advyx_pipeline_${Date.now()}.json`);
@@ -173,6 +193,8 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
         return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
       case 'Archived':
         return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+      default:
+        return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
@@ -186,6 +208,8 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
         return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
       case 'Cancelled':
         return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+      default:
+        return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
@@ -255,28 +279,28 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
           <div className="p-3.5 px-6">
             <span className="text-slate-400 block text-[11px]">Active Inquiries</span>
             <span className="text-xl font-extrabold font-display text-[#2374B8]">
-              {inquiries.length}
+              {safeInquiries.length}
             </span>
           </div>
           <div className="p-3.5 px-6">
             <span className="text-slate-400 block text-[11px]">New / Action Required</span>
             <span className="text-xl font-extrabold font-display text-sky-500">
-              {inquiries.filter((i) => i.status === 'New').length}
+              {safeInquiries.filter((i) => i.status === 'New').length}
             </span>
           </div>
           <div className="p-3.5 px-6">
             <span className="text-slate-400 block text-[11px]">Discovery Calls Booked</span>
             <span className="text-xl font-extrabold font-display text-emerald-500">
-              {appointments.filter((a) => a.status === 'Upcoming').length}
+              {safeAppointments.filter((a) => a.status === 'Upcoming').length}
             </span>
           </div>
           <div className="p-3.5 px-6">
             <span className="text-slate-400 block text-[11px]">Client Conversion Rate</span>
             <span className="text-xl font-extrabold font-display text-purple-500">
-              {inquiries.length > 0
+              {safeInquiries.length > 0
                 ? `${Math.round(
-                    (inquiries.filter((i) => i.status === 'Closed Won').length /
-                      inquiries.length) *
+                    (safeInquiries.filter((i) => i.status === 'Closed Won').length /
+                      safeInquiries.length) *
                       100
                   )}%`
                 : '0%'}
@@ -297,7 +321,7 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
               }`}
             >
               <Inbox className="w-3.5 h-3.5" />
-              <span>Inquiries ({inquiries.length})</span>
+              <span>Inquiries ({safeInquiries.length})</span>
             </button>
 
             <button
@@ -310,7 +334,7 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Appointments ({appointments.length})</span>
+              <span>Appointments ({safeAppointments.length})</span>
             </button>
 
             <button
@@ -405,28 +429,32 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
                         >
                           {inq.status}
                         </span>
-                        <h4 className="text-sm font-bold font-display">{inq.businessName}</h4>
+                        <h4 className="text-sm font-bold font-display">{inq.businessName || 'Unnamed Business'}</h4>
                         <span className="text-xs text-slate-400">•</span>
                         <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                          {inq.clientName}
+                          {inq.clientName || 'Unnamed Contact'}
                         </span>
                         <span className="text-[10px] text-slate-400 font-mono ml-auto sm:ml-0">
-                          {new Date(inq.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          {inq.createdAt
+                            ? new Date(inq.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                              })
+                            : ''}
                         </span>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-2">
-                        <span className="text-[#2374B8] font-semibold">{inq.service}</span>
-                        <span>{inq.country ? `🌍 ${inq.country} • ` : ''}Budget: {inq.budget}</span>
+                        <span className="text-[#2374B8] font-semibold">{inq.service || 'General Inquiry'}</span>
+                        <span>{inq.country ? `🌍 ${inq.country} • ` : ''}Budget: {inq.budget || 'N/A'}</span>
                         <span className="font-mono">{inq.email}</span>
                       </div>
 
-                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 italic">
-                        "{inq.message}"
-                      </p>
+                      {inq.message && (
+                        <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 italic">
+                          "{inq.message}"
+                        </p>
+                      )}
 
                       {inq.notes && (
                         <div className="mt-2 text-[11px] px-2.5 py-1 rounded-lg bg-[#2374B8]/10 text-[#2374B8] dark:text-sky-300 font-medium inline-block">
@@ -468,7 +496,7 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
 
                       <a
                         href={`mailto:${inq.email}?subject=ADVYX%20Media%20Growth%20Inquiry%20-%20${encodeURIComponent(
-                          inq.businessName
+                          inq.businessName || ''
                         )}`}
                         className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-[#2374B8]"
                         title="Email Prospect"
@@ -518,24 +546,23 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
                         >
                           {appt.status}
                         </span>
-                        <h4 className="text-sm font-bold font-display">{appt.businessName}</h4>
+                        <h4 className="text-sm font-bold font-display">{appt.businessName || 'Unnamed Business'}</h4>
                         <span className="text-xs text-slate-400">•</span>
                         <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                          {appt.name}
-                        </span>
+                          </span>
+                           {appt.name || 'Unnamed Contact'}                      
                       </div>
-
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                        <span className="text-[#2374B8] font-bold">{appt.callType}</span>
+                        <span className="text-[#2374B8] font-bold">{appt.callType || 'Discovery Call'}</span>
                         <span className="font-semibold text-slate-700 dark:text-slate-200">
-                          📅 {appt.date} at {appt.time} ({appt.timezone})
+                          📅 {appt.date} at {appt.time} {appt.timezone ? `(${appt.timezone})` : ''}
                         </span>
                         <span className="font-mono">{appt.email}</span>
                       </div>
 
                       <div className="text-[11px] text-slate-400 mt-1">
-                        Topic: {appt.service}
-                      </div>
+                    Topic: {appt.service || 'General Strategy'}                      
+                    </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
@@ -557,7 +584,7 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
 
                       <a
                         href={`mailto:${appt.email}?subject=ADVYX%20Discovery%20Call%20Preparation%20-%20${encodeURIComponent(
-                          appt.businessName
+                          appt.businessName || ''
                         )}`}
                         className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-[#2374B8]"
                         title="Send Meeting Prep Email"
@@ -707,25 +734,25 @@ export const AgencyDashboardModal: React.FC<AgencyDashboardModalProps> = ({
               Inquiry Dossier
             </span>
             <h3 className="text-2xl font-bold font-display mt-1">
-              {selectedInquiry.businessName}
+              {selectedInquiry.businessName || 'Unnamed Business'}
             </h3>
             <p className="text-xs text-slate-500 mb-6">
-              Contact: {selectedInquiry.clientName} • {selectedInquiry.email}
+              Contact: {selectedInquiry.clientName || 'N/A'} • {selectedInquiry.email}
             </p>
 
             <div className="space-y-3 text-xs mb-6">
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                 <span className="text-slate-400 block mb-1">Service & Investment:</span>
-                <span className="font-semibold text-[#2374B8]">{selectedInquiry.service}</span>
+                <span className="font-semibold text-[#2374B8]">{selectedInquiry.service || 'N/A'}</span>
                 {selectedInquiry.country && (
                   <span className="text-slate-500"> • Country: <strong className="text-slate-700 dark:text-slate-200">{selectedInquiry.country}</strong></span>
                 )}
-                <span> • Budget: <strong className="text-slate-700 dark:text-slate-200">{selectedInquiry.budget}</strong></span>
+                <span> • Budget: <strong className="text-slate-700 dark:text-slate-200">{selectedInquiry.budget || 'N/A'}</strong></span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                 <span className="text-slate-400 block mb-1">Full Inquiry Message:</span>
-                <p className="italic leading-relaxed">{selectedInquiry.message}</p>
+                <p className="italic leading-relaxed">{selectedInquiry.message || 'No message provided.'}</p>
               </div>
 
               <div>
